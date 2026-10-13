@@ -17,7 +17,7 @@ concurrency:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    # 상세는 한 번에 600건(1초 간격)까지라 최악 15분 안팎.
+    # 상세는 한 번에 300건(1초 간격)까지라 최악 10분 안팎.
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4

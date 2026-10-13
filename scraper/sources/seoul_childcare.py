@@ -68,9 +68,9 @@ def parse_detail(t):
     }
 
 
-def collect(cache, max_details=600, delay=1.0):
+def collect(cache, max_details=300, delay=1.0):
     """cache: joseq -> 상세 파싱 결과. 상세는 처음 본 공고만 받는다.
-    짧은 시간에 수천 건을 받으면 사이트가 IP 를 한동안 막는다. 그래서 한 번에 600건까지만 받고 나머지는 다음 실행으로 미룬다."""
+    15분에 600건쯤 받으면 사이트가 IP 를 20~30분 막는다. 그래서 한 번에 300건까지만 받고 나머지는 다음 실행으로 미룬다."""
     rows = list_open()
     jobs, fetched = [], 0
     for r in rows:
