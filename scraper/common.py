@@ -4,7 +4,7 @@ import time
 import urllib.parse
 import urllib.request
 
-UA = "Mozilla/5.0 (compatible; bomo-jobs/1.0; +https://github.com/)"
+UA = "Mozilla/5.0 (compatible; buddie-jobs/1.0; +https://github.com/)"
 
 SEOUL_GU = [
     "종로구", "중구", "용산구", "성동구", "광진구", "동대문구", "중랑구", "성북구", "강북구",
@@ -65,6 +65,24 @@ def job_of(text):
         if key in (text or ""):
             return job
     return "기타"
+
+
+# 센터 게시판 본문에 적힌 위탁 재단 이름 → 재단별 보기의 이름. 재단 사이트 출처의 NAME 과 같게 둬야 한 묶음이 된다.
+FOUNDATIONS = {
+    "한국아동보육복지협회": r"한국\s*아동\s*보육\s*복지\s*협회",
+    "킨더슐레": r"킨더\s*슐레",
+    "한빛바른보육경영원": r"한빛\s*바른\s*보육",
+    "푸르니보육지원재단": r"푸르니",
+    "한솔어린이보육재단": r"한솔\s*어린이\s*보육\s*재단",
+    "삼성복지재단": r"삼성\s*복지\s*재단",
+}
+
+
+def foundation_of(text):
+    for name, pat in FOUNDATIONS.items():
+        if re.search(pat, text or ""):
+            return name
+    return None
 
 
 def cover_letter(body):

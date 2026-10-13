@@ -2,7 +2,7 @@
 import re
 import time
 
-from common import clean, cover_letter, deadline_hint, fetch, find_gu, to_text
+from common import clean, cover_letter, deadline_hint, fetch, find_gu, foundation_of, to_text
 
 ID = "seoul-ccef"
 NAME = "서울시육아종합지원센터"
@@ -64,21 +64,24 @@ def parse_detail(t):
         "pay": fields.get("임금"),
         "deadlineHint": deadline_hint(body),
         "coverLetter": cover_letter(body),
+        "foundation": foundation_of(body),
     }
 
 
-def collect(cache, max_details=3000, delay=0.2):
-    """cache: joseq -> 상세 파싱 결과. 상세는 처음 본 공고만 받는다."""
+def collect(cache, max_details=600, delay=1.0):
+    """cache: joseq -> 상세 파싱 결과. 상세는 처음 본 공고만 받는다.
+    짧은 시간에 수천 건을 받으면 사이트가 IP 를 한동안 막는다. 그래서 한 번에 600건까지만 받고 나머지는 다음 실행으로 미룬다."""
     rows = list_open()
     jobs, fetched = [], 0
     for r in rows:
         d = cache.get(r["joseq"])
-        if d is None and fetched < max_details:
+        # "foundation" 이 없는 건 재단 추출을 넣기 전의 캐시라 다시 받는다.
+        if (d is None or "foundation" not in d) and fetched < max_details:
             try:
                 d = parse_detail(fetch(detail_url(r["joseq"]), timeout=30, retries=1))
                 cache[r["joseq"]] = d
             except Exception:
-                d = None
+                d = cache.get(r["joseq"])
             fetched += 1
             time.sleep(delay)
         d = d or {}
@@ -86,7 +89,7 @@ def collect(cache, max_details=3000, delay=0.2):
         jobs.append({
             "id": f"{ID}:{r['joseq']}",
             "source": ID,
-            "foundation": None,
+            "foundation": d.get("foundation") or foundation_of(r["title"] + " " + r["org"]),
             "kind": "어린이집",
             "title": r["title"],
             "org": r["org"],

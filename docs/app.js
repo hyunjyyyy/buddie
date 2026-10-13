@@ -22,8 +22,8 @@
     get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* 저장 안 돼도 화면은 동작 */ } },
   };
-  let state = { ...DEFAULT, ...store.get("moa.filters", {}) };
-  let favs = new Set(store.get("moa.favs", []));
+  let state = { ...DEFAULT, ...store.get("buddie.filters", {}) };
+  let favs = new Set(store.get("buddie.favs", []));
   let all = [];
   let shown = PAGE;
 
@@ -128,12 +128,17 @@
   }
 
   let sources = [];
-  const foundations = () => sources.filter((s) => s.foundation);
+  // 재단 사이트 출처 + 센터 게시판 본문에서만 이름이 나온 재단(사이트 없음)
+  const foundations = () => {
+    const fs = sources.filter((s) => s.foundation).map((s) => ({ name: s.name, url: s.url, ok: s.ok }));
+    for (const j of all) if (j.foundation && !fs.some((f) => f.name === j.foundation)) fs.push({ name: j.foundation, url: null, ok: true });
+    return fs;
+  };
   const fnd = (j) => j.foundation || NO_FOUNDATION;
   const sourceName =(id) => ((sources.find((s) => s.id === id) || {}).name || id).replace(/^서울시/, "").replace(/보육지원재단$/, "");
 
   function saveFavs() {
-    store.set("moa.favs", [...favs]);
+    store.set("buddie.favs", [...favs]);
     favChips();
     render();
   }
@@ -182,12 +187,19 @@
     const out = foundations()
       .filter((f) => !state.foundation.length || state.foundation.includes(f.name))
       .map((f) => {
-        const jobs = list.filter((j) => j.foundation === f.name);
+        const mine = list.filter((j) => j.foundation === f.name);
+        // 같은 공고가 센터 게시판에도 올라오면 재단 사이트 쪽만 남긴다.
+        const site = mine.filter((j) => j.source !== "seoul-ccef");
+        const same = (a, b) => a.end === b.end && (norm(a.org).includes(norm(b.org)) || norm(b.org).includes(norm(a.org)));
+        const jobs = mine.filter((j) => j.source !== "seoul-ccef" || !site.some((s) => same(s, j)));
         const sec = el("section", "group");
         const head = el("div", "group-head");
-        const a = el("a", null, "재단 채용 사이트 ↗");
-        a.href = safeUrl(f.url); a.target = "_blank"; a.rel = "noopener noreferrer";
-        head.append(el("h3", null, f.name), el("span", "count", `서울 공고 ${jobs.length}건`), a);
+        head.append(el("h3", null, f.name), el("span", "count", `서울 공고 ${jobs.length}건`));
+        if (f.url) {
+          const a = el("a", null, "재단 채용 사이트 ↗");
+          a.href = safeUrl(f.url); a.target = "_blank"; a.rel = "noopener noreferrer";
+          head.append(a);
+        } else head.append(el("span", "count", "· 센터 게시판 본문에서 찾은 공고"));
         sec.append(head);
         if (jobs.length) { const ol = el("ol", "jobs"); ol.append(...jobs.map(card)); sec.append(ol); }
         else sec.append(el("p", "none", f.ok ? "지금 조건에 맞는 서울 공고가 없어요." : "이번 갱신에서 사이트를 읽지 못했어요."));
@@ -199,7 +211,7 @@
       const b = el("button", null, "전체 목록에서 보기");
       b.type = "button";
       b.addEventListener("click", () => { state.view = "list"; update(); });
-      sec.append(`재단 사이트가 아닌 서울시육아종합지원센터 게시판 공고 ${rest.toLocaleString()}건 · `, b);
+      sec.append(`본문에 위탁 재단 이름이 없는 서울시육아종합지원센터 게시판 공고 ${rest.toLocaleString()}건 · `, b);
       out.push(sec);
     }
     $("#groups").replaceChildren(...out);
@@ -207,7 +219,7 @@
 
   function update() {
     shown = PAGE;
-    store.set("moa.filters", state);
+    store.set("buddie.filters", state);
     render();
   }
 
