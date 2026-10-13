@@ -3,7 +3,7 @@ import re
 import time
 from datetime import datetime, timedelta, timezone
 
-from common import clean, cover_letter, fetch, to_text
+from common import clean, cover_letter, fetch, job_of, to_text
 from sources import seoul_childcare
 
 ID = "samsung"
@@ -83,7 +83,7 @@ def collect(cache, delay=0.3):
             "title": f"{r['org']} {r['job']}",
             "org": r["org"],
             "orgType": "직장",
-            "job": "보조교사" if "보조" in r["job"] else "대체교사" if "대체" in r["job"] else "보육교사" if "교사" in r["job"] else "기타",
+            "job": job_of(r["job"]),
             "gu": gu,
             "addr": gu or "서울",
             "start": r["start"],

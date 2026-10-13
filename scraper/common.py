@@ -58,6 +58,15 @@ def deadline_hint(body):
     return None
 
 
+def job_of(text):
+    """재단 사이트의 자유 서술 직종을 센터 게시판 직종 이름으로 맞춘다."""
+    for key, job in (("보조", "보조교사"), ("대체", "대체교사"), ("조리", "조리원"), ("영양", "영양사"),
+                     ("간호", "간호사"), ("원장", "원장"), ("교사", "보육교사")):
+        if key in (text or ""):
+            return job
+    return "기타"
+
+
 def cover_letter(body):
     if re.search(r"자기\s*소개서|자소서", body):
         return True

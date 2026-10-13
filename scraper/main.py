@@ -5,9 +5,9 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from sources import puruni, samsung, seoul_childcare  # noqa: E402
+from sources import hansol, kacew, puruni, samsung, seoul_childcare  # noqa: E402
 
-SOURCES = [seoul_childcare, puruni, samsung]
+SOURCES = [seoul_childcare, puruni, samsung, hansol, kacew]
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "docs" / "data" / "jobs.json"
 CACHE = ROOT / "data" / "detail-cache.json"
