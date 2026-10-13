@@ -7,6 +7,7 @@ from common import clean, cover_letter, deadline_hint, fetch, find_gu, to_text
 ID = "puruni"
 NAME = "푸르니보육지원재단"
 BASE = "https://recruit.puruni.com/recruit/notice"
+FOUNDATION = True
 HOME = BASE
 
 
@@ -55,6 +56,7 @@ def collect(cache, delay=0.3):
         jobs.append({
             "id": f"{ID}:{r['idx']}",
             "source": ID,
+            "foundation": NAME,
             "kind": "어린이집",
             "title": re.sub(r"^\s*\[[^\]]+\]\s*", "", r["title"]),
             "org": org,

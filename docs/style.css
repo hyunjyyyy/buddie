@@ -12,6 +12,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   margin: 0;
@@ -78,6 +79,20 @@ main { padding: clamp(40px, 6vw, 80px) var(--gutter) 40px; }
   font-size: 13px; font-weight: 600; letter-spacing: .04em;
 }
 .section-title small { font-weight: 400; color: var(--muted); }
+
+.viewtabs { margin-left: auto; display: inline-flex; border: 1px solid var(--ink); border-radius: 999px; overflow: hidden; }
+.viewtabs button { border: 0; background: transparent; padding: 6px 14px; font-size: 13px; font-weight: 500; cursor: pointer; }
+.viewtabs button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+
+/* 재단별 보기 */
+.group { margin-top: 36px; }
+.group-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 14px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+.group-head h3 { margin: 0; font-size: clamp(24px, 3.4vw, 40px); font-weight: 500; letter-spacing: -.04em; }
+.group-head .count { font-size: 13px; color: var(--muted); }
+.group-head a { margin-left: auto; font-size: 13px; }
+.group .none { padding: 18px 0; color: var(--muted); font-size: 14px; }
+.group.rest { padding: 20px; background: var(--paper); font-size: 14px; }
+.group.rest button { border: 0; background: none; padding: 0; text-decoration: underline; cursor: pointer; }
 
 /* filters */
 .filters { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }

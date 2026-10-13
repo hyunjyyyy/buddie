@@ -5,9 +5,9 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from sources import puruni, seoul_childcare  # noqa: E402
+from sources import puruni, samsung, seoul_childcare  # noqa: E402
 
-SOURCES = [seoul_childcare, puruni]
+SOURCES = [seoul_childcare, puruni, samsung]
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "docs" / "data" / "jobs.json"
 CACHE = ROOT / "data" / "detail-cache.json"
@@ -31,14 +31,14 @@ def main():
         c = cache.setdefault(src.ID, {})
         try:
             got = src.collect(c)
-            status.append({"id": src.ID, "name": src.NAME, "url": src.HOME, "ok": True,
+            status.append({"id": src.ID, "name": src.NAME, "url": src.HOME, "ok": True, "foundation": getattr(src, "FOUNDATION", False),
                            "count": len(got), "checkedAt": now, "lastOkAt": now})
         except Exception:
             traceback.print_exc()
             # 실패한 출처는 직전 결과를 그대로 두고, 화면에는 실패로 표시한다.
             got = [j for j in prev["jobs"] if j["source"] == src.ID]
             p = prev_status.get(src.ID, {})
-            status.append({"id": src.ID, "name": src.NAME, "url": src.HOME, "ok": False,
+            status.append({"id": src.ID, "name": src.NAME, "url": src.HOME, "ok": False, "foundation": getattr(src, "FOUNDATION", False),
                            "count": len(got), "checkedAt": now, "lastOkAt": p.get("lastOkAt")})
         jobs.extend(got)
         print(f"{src.ID}: {len(got)}")

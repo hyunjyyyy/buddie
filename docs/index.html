@@ -58,6 +58,11 @@
       </div>
 
       <div class="frow">
+        <span class="flabel">재단</span>
+        <div class="chips" id="f-foundation"></div>
+      </div>
+
+      <div class="frow">
         <span class="flabel">시설</span>
         <div class="chips" id="f-type"></div>
       </div>
@@ -101,7 +106,14 @@
       <ol class="jobs" id="fav-jobs"></ol>
     </section>
 
-    <h2 class="section-title"><span id="result-count">공고</span></h2>
+    <h2 class="section-title">
+      <span id="result-count">공고</span>
+      <span class="viewtabs" role="group" aria-label="보기 방식">
+        <button type="button" data-view="list" aria-pressed="true">전체 목록</button>
+        <button type="button" data-view="foundation" aria-pressed="false">재단별</button>
+      </span>
+    </h2>
+    <div id="groups" hidden></div>
     <ol class="jobs" id="jobs"></ol>
     <p class="empty" id="empty" hidden>조건에 맞는 공고가 없어요. 필터를 줄여 보세요.</p>
     <button type="button" class="more" id="more" hidden>더 보기</button>

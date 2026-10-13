@@ -14,7 +14,8 @@
     "간호": ["간호사", "간호조무사"],
     "기타": ["사무원", "운전기사", "기타"],
   };
-  const DEFAULT = { kind: ["어린이집"], gu: [], type: [], job: [], q: "", fav: false, cl: false, sort: "end" };
+  const DEFAULT = { kind: ["어린이집"], gu: [], foundation: [], type: [], job: [], q: "", fav: false, cl: false, sort: "end", view: "list" };
+  const NO_FOUNDATION = "센터 게시판";
   const today = new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" });
 
   const store = {
@@ -58,6 +59,8 @@
     const live = all.filter((j) => !j.end || j.end >= today);
     const count = (f) => live.filter(f).length;
     chips($("#f-gu"), GU.map((g) => [g, g, count((j) => j.gu === g)]), "gu");
+    chips($("#f-foundation"), [...foundations().map((f) => f.name), NO_FOUNDATION]
+      .map((f) => [f, f, count((j) => fnd(j) === f)]), "foundation");
     chips($("#f-type"), TYPES.map((t) => [t, t, count((j) => j.orgType === t)]).filter((x) => x[2]), "type");
     chips($("#f-job"), Object.entries(JOB_GROUPS).map(([g, list]) => [g, g, count((j) => list.includes(j.job))]).filter((x) => x[2]), "job");
     document.querySelectorAll("#f-kind input").forEach((i) => {
@@ -73,6 +76,7 @@
     if (j.end && j.end < today) return false;
     if (!state.kind.includes(j.kind)) return false;
     if (state.gu.length && !state.gu.includes(j.gu)) return false;
+    if (state.foundation.length && !state.foundation.includes(fnd(j))) return false;
     if (state.type.length && !state.type.includes(j.orgType)) return false;
     if (state.job.length && !state.job.some((g) => (JOB_GROUPS[g] || []).includes(j.job))) return false;
     if (state.fav && !isFav(j)) return false;
@@ -124,7 +128,9 @@
   }
 
   let sources = [];
-  const sourceName = (id) => ((sources.find((s) => s.id === id) || {}).name || id).replace(/^서울시/, "").replace(/보육지원재단$/, "");
+  const foundations = () => sources.filter((s) => s.foundation);
+  const fnd = (j) => j.foundation || NO_FOUNDATION;
+  const sourceName =(id) => ((sources.find((s) => s.id === id) || {}).name || id).replace(/^서울시/, "").replace(/보육지원재단$/, "");
 
   function saveFavs() {
     store.set("moa.favs", [...favs]);
@@ -150,11 +156,15 @@
 
   function render() {
     const list = all.filter(matches).sort(sorter);
-    const ol = $("#jobs");
-    ol.replaceChildren(...list.slice(0, shown).map(card));
+    const grouped = state.view === "foundation";
+    document.querySelectorAll(".viewtabs button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.view === state.view)));
+    $("#groups").hidden = !grouped;
+    $("#jobs").hidden = grouped;
+    if (grouped) renderGroups(list);
+    else $("#jobs").replaceChildren(...list.slice(0, shown).map(card));
     $("#result-count").textContent = `공고 ${list.length.toLocaleString()}건`;
-    $("#empty").hidden = list.length > 0;
-    $("#more").hidden = list.length <= shown;
+    $("#empty").hidden = list.length > 0 || grouped;
+    $("#more").hidden = grouped || list.length <= shown;
     $("#more").textContent = `더 보기 (${Math.min(PAGE, list.length - shown)}건)`;
 
     const favJobs = all.filter((j) => isFav(j) && (!j.end || j.end >= today) && state.kind.includes(j.kind)).sort(sorter);
@@ -162,8 +172,37 @@
     $("#fav-jobs").replaceChildren(...favJobs.map(card));
     $("#fav-names").textContent = favJobs.length ? `${favJobs.length}건` : "지금 열린 공고 없음";
 
-    const n = state.gu.length + state.type.length + state.job.length + (state.q ? 1 : 0) + (state.fav ? 1 : 0) + (state.cl ? 1 : 0);
+    const n = state.gu.length + state.foundation.length + state.type.length + state.job.length + (state.q ? 1 : 0) + (state.fav ? 1 : 0) + (state.cl ? 1 : 0);
     $("#filter-summary").textContent = n ? `${n}개 조건 적용` : "전체";
+  }
+
+  // 재단별 보기. 재단 공고는 많지 않아 페이지를 나누지 않는다. 센터 게시판 공고는 수가 많아 건수만 보여준다.
+  function renderGroups(list) {
+    const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+    const out = foundations()
+      .filter((f) => !state.foundation.length || state.foundation.includes(f.name))
+      .map((f) => {
+        const jobs = list.filter((j) => j.foundation === f.name);
+        const sec = el("section", "group");
+        const head = el("div", "group-head");
+        const a = el("a", null, "재단 채용 사이트 ↗");
+        a.href = safeUrl(f.url); a.target = "_blank"; a.rel = "noopener noreferrer";
+        head.append(el("h3", null, f.name), el("span", "count", `서울 공고 ${jobs.length}건`), a);
+        sec.append(head);
+        if (jobs.length) { const ol = el("ol", "jobs"); ol.append(...jobs.map(card)); sec.append(ol); }
+        else sec.append(el("p", "none", f.ok ? "지금 조건에 맞는 서울 공고가 없어요." : "이번 갱신에서 사이트를 읽지 못했어요."));
+        return sec;
+      });
+    const rest = list.filter((j) => !j.foundation).length;
+    if (rest && (!state.foundation.length || state.foundation.includes(NO_FOUNDATION))) {
+      const sec = el("section", "group rest");
+      const b = el("button", null, "전체 목록에서 보기");
+      b.type = "button";
+      b.addEventListener("click", () => { state.view = "list"; update(); });
+      sec.append(`재단 사이트가 아닌 서울시육아종합지원센터 게시판 공고 ${rest.toLocaleString()}건 · `, b);
+      out.push(sec);
+    }
+    $("#groups").replaceChildren(...out);
   }
 
   function update() {
@@ -209,6 +248,7 @@
   }));
   $("#f-reset").addEventListener("click", () => { state = { ...DEFAULT }; buildFilters(); update(); });
   $("#more").addEventListener("click", () => { shown += PAGE; render(); });
+  document.querySelectorAll(".viewtabs button").forEach((b) => b.addEventListener("click", () => { state.view = b.dataset.view; update(); }));
   $("#fav-form").addEventListener("submit", (e) => {
     e.preventDefault();
     const v = norm($("#fav-input").value);

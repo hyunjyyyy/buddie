@@ -12,8 +12,10 @@
 | --- | --- | --- |
 | `seoul-ccef` | 서울시육아종합지원센터 어린이집구인 | 서울 25개 구 전체. 상세는 처음 본 공고만 받아 `data/detail-cache.json` 에 둔다 |
 | `puruni` | 푸르니보육지원재단 채용공고 | 전국 공고 중 서울만 |
+| `samsung` | 삼성복지재단 삼성어린이집 교직원 채용 | 주소 칸이 없어 연락처 02 로 서울 판별, 구는 센터 게시판에서 어린이집 이름으로 찾음 |
 
 출처 추가: `scraper/sources/` 에 `ID`, `NAME`, `HOME`, `collect(cache)` 를 가진 모듈을 만들고
+(재단 사이트면 `FOUNDATION = True` 와 공고마다 `foundation` 을 넣어 재단별 보기에 묶이게 한다)
 `scraper/main.py` 의 `SOURCES` 에 넣는다. `collect` 는 `seoul_childcare.py` 와 같은 모양의 dict 목록을 돌려준다.
 
 ## 로컬 실행

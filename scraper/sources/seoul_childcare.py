@@ -37,6 +37,20 @@ def list_open():
     return rows
 
 
+def gu_of(org, cache):
+    """다른 출처의 어린이집 이름으로 이 게시판의 지난 공고를 찾아 구를 알아낸다. 못 찾은 것도 "" 로 기억한다."""
+    if org in cache:
+        return cache[org] or None
+    try:
+        t = fetch(BASE + "JobOfferSlPL.jsp", {"flag": "SlPL", "offset": 0, "limit": 5, "endYn": "", "schCrName": org},
+                  timeout=30, retries=0)
+    except Exception:
+        return None  # 접속 실패는 기억하지 않고 다음 실행에서 다시 찾는다
+    m = re.search(r"서울특별시\s*(\S+구)", t)
+    cache[org] = find_gu(m.group(0)) if m else ""
+    return cache[org] or None
+
+
 def parse_detail(t):
     fields = {}
     for th, td in re.findall(r"<th[^>]*>(.*?)</th>\s*<td[^>]*>(.*?)</td>", t, re.S):
@@ -72,6 +86,7 @@ def collect(cache, max_details=3000, delay=0.2):
         jobs.append({
             "id": f"{ID}:{r['joseq']}",
             "source": ID,
+            "foundation": None,
             "kind": "어린이집",
             "title": r["title"],
             "org": r["org"],
