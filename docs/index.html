@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MOA — 서울 보육교사 채용 모아보기</title>
+  <meta name="description" content="서울시육아종합지원센터와 위탁재단 채용공고를 하루 두 번 모아 마감순으로 보여줍니다.">
+  <meta name="theme-color" content="#EFEAE3">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%234A2C1F'/%3E%3Ctext x='16' y='22' font-size='16' text-anchor='middle' fill='%23EFEAE3' font-family='sans-serif'%3EM%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="nav">
+    <a class="brand" href="./">MOA&nbsp;·&nbsp;보육공고</a>
+    <nav>
+      <a href="#list">공고</a>
+      <a href="#sources">출처</a>
+    </nav>
+    <a class="nav-cta" href="#list">지금 구인 중 <span aria-hidden="true">›</span></a>
+  </header>
+
+  <section class="hero">
+    <p class="eyebrow">서울 · 어린이집 · 하루 두 번 갱신</p>
+    <h1>
+      <span class="l1">흩어진 공고를</span>
+      <span class="l2">한 곳에서,</span>
+      <span class="l3">마감 순으로.</span>
+    </h1>
+    <p class="hero-note">육아종합지원센터와 위탁재단 게시판을<br>오전 8시·오후 6시에 읽어 와서 모아 둡니다.<br>지원은 원문에서 하세요.</p>
+  </section>
+
+  <section class="stats" aria-label="요약">
+    <div class="stat"><p>지금 구인 중인<br>서울 공고</p><b id="st-total">–</b></div>
+    <div class="stat"><p>그중<br>직장어린이집</p><b id="st-work">–</b></div>
+    <div class="stat"><p>3일 안에<br>마감되는 공고</p><b id="st-soon">–</b></div>
+    <div class="stat dark">
+      <p>관심 어린이집을 ★로 표시해 두면<br>새 공고가 맨 위에 모입니다.</p>
+      <span class="small" id="st-updated">불러오는 중…</span>
+    </div>
+  </section>
+
+  <main id="list">
+    <details class="filters" id="filters" open>
+      <summary><span>필터</span><span class="summary-count" id="filter-summary"></span></summary>
+
+      <div class="frow">
+        <span class="flabel">구분</span>
+        <div class="chips" id="f-kind">
+          <label class="chip"><input type="checkbox" value="어린이집" checked><span>어린이집</span></label>
+          <label class="chip is-disabled" title="준비 중"><input type="checkbox" value="유치원" disabled><span>유치원 <em>준비 중</em></span></label>
+        </div>
+      </div>
+
+      <div class="frow">
+        <span class="flabel">지역</span>
+        <div class="chips" id="f-gu"></div>
+      </div>
+
+      <div class="frow">
+        <span class="flabel">시설</span>
+        <div class="chips" id="f-type"></div>
+      </div>
+
+      <div class="frow">
+        <span class="flabel">직종</span>
+        <div class="chips" id="f-job"></div>
+      </div>
+
+      <div class="frow">
+        <span class="flabel">★ 관심</span>
+        <div class="chips fav-row">
+          <form id="fav-form" class="fav-form">
+            <input id="fav-input" type="text" placeholder="어린이집 이름 추가 (예: 국방부청사)" autocomplete="off" aria-label="관심 어린이집 이름">
+            <button type="submit">추가</button>
+          </form>
+          <span id="fav-list" class="chips"></span>
+        </div>
+      </div>
+
+      <div class="frow frow-inline">
+        <label class="search">
+          <span class="flabel">검색</span>
+          <input type="search" id="f-q" placeholder="어린이집 이름, 제목" autocomplete="off">
+        </label>
+        <label class="toggle"><input type="checkbox" id="f-fav"><span>★ 관심만</span></label>
+        <label class="toggle"><input type="checkbox" id="f-cl"><span>자소서 언급</span></label>
+        <label class="sort">
+          <span class="flabel">정렬</span>
+          <select id="f-sort">
+            <option value="end">마감 임박순</option>
+            <option value="new">최근 등록순</option>
+          </select>
+        </label>
+        <button type="button" class="reset" id="f-reset">초기화</button>
+      </div>
+    </details>
+
+    <section id="fav-section" class="fav-section" hidden>
+      <h2 class="section-title"><span>★ 관심 어린이집</span><small id="fav-names"></small></h2>
+      <ol class="jobs" id="fav-jobs"></ol>
+    </section>
+
+    <h2 class="section-title"><span id="result-count">공고</span></h2>
+    <ol class="jobs" id="jobs"></ol>
+    <p class="empty" id="empty" hidden>조건에 맞는 공고가 없어요. 필터를 줄여 보세요.</p>
+    <button type="button" class="more" id="more" hidden>더 보기</button>
+  </main>
+
+  <footer id="sources">
+    <h2 class="section-title"><span>출처</span></h2>
+    <ul class="sources" id="source-list"></ul>
+    <p class="fine">공고 내용과 마감일은 각 게시판 원문이 기준입니다. 이 사이트는 원문을 읽어 모아 보여주기만 하며,
+      자기소개서 여부는 본문에 '자기소개서'라는 말이 있는지만 보고 표시합니다.</p>
+  </footer>
+
+  <template id="tpl-job">
+    <li class="job">
+      <div class="dday"><b></b><span></span></div>
+      <div class="main">
+        <p class="meta"></p>
+        <h3><a target="_blank" rel="noopener noreferrer"></a></h3>
+        <p class="org"><button type="button" class="star" aria-pressed="false" title="관심 어린이집"></button><span></span></p>
+        <p class="hint"></p>
+      </div>
+      <div class="side">
+        <p class="period"></p>
+        <p class="tags"></p>
+        <a class="go" target="_blank" rel="noopener noreferrer">원문 보기 <span aria-hidden="true">↗</span></a>
+      </div>
+    </li>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
