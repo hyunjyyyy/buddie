@@ -5,6 +5,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
+from common import is_teacher  # noqa: E402
 from sources import hansol, kacew, puruni, samsung, seoul_childcare  # noqa: E402
 
 SOURCES = [seoul_childcare, puruni, samsung, hansol, kacew]
@@ -47,7 +48,7 @@ def main():
     for src in SOURCES:
         c = cache.setdefault(src.ID, {})
         try:
-            got = dedupe(src.collect(c))
+            got = dedupe([j for j in src.collect(c) if is_teacher(j["job"])])
             status.append({"id": src.ID, "name": src.NAME, "url": src.HOME, "ok": True, "foundation": getattr(src, "FOUNDATION", False),
                            "count": len(got), "checkedAt": now, "lastOkAt": now})
         except Exception:
