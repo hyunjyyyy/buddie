@@ -21,6 +21,23 @@ def load(path, default):
         return default
 
 
+def dedupe(jobs):
+    """같은 어린이집이 같은 공고를 끌어올리려고 매일 새로 올린 것(센터 게시판에 특히 많다)은 가장 최근 글 하나만 남긴다.
+    마감일은 같은 묶음 중 가장 늦은 것으로 둔다."""
+    kept = {}
+    for j in jobs:
+        key = (j["source"], j["org"], j["title"], j["job"], j.get("start"))
+        k = kept.get(key)
+        if k is None:
+            kept[key] = dict(j)
+        elif (j.get("posted") or "", j["id"]) > (k.get("posted") or "", k["id"]):
+            end = max(filter(None, (j.get("end"), k.get("end"))), default=None)
+            kept[key] = dict(j, end=end)
+        elif j.get("end") and (not k.get("end") or j["end"] > k["end"]):
+            k["end"] = j["end"]
+    return list(kept.values())
+
+
 def main():
     now = datetime.now(KST).isoformat(timespec="minutes")
     prev = load(OUT, {"jobs": [], "sources": []})
@@ -30,7 +47,7 @@ def main():
     for src in SOURCES:
         c = cache.setdefault(src.ID, {})
         try:
-            got = src.collect(c)
+            got = dedupe(src.collect(c))
             status.append({"id": src.ID, "name": src.NAME, "url": src.HOME, "ok": True, "foundation": getattr(src, "FOUNDATION", False),
                            "count": len(got), "checkedAt": now, "lastOkAt": now})
         except Exception:
