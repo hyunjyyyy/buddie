@@ -4,17 +4,7 @@
     "도봉구", "노원구", "은평구", "서대문구", "마포구", "양천구", "강서구", "구로구", "금천구",
     "영등포구", "동작구", "관악구", "서초구", "강남구", "송파구", "강동구"];
   const TYPES = ["국공립", "직장", "민간", "가정", "법인·단체등", "사회복지법인", "협동"];
-  const JOB_GROUPS = {
-    "보육교사": ["보육교사", "가정보육교사"],
-    "보조교사": ["보조교사", "누리과정보조교사"],
-    "대체교사": ["대체교사"],
-    "특수교사·치료사": ["특수교사", "치료사"],
-    "원장": ["원장"],
-    "조리·영양": ["조리원", "영양사", "대체조리사"],
-    "간호": ["간호사", "간호조무사"],
-    "기타": ["사무원", "운전기사", "기타"],
-  };
-  const DEFAULT = { kind: ["어린이집"], gu: [], foundation: [], type: [], job: [], q: "", fav: false, cl: false, sort: "end", view: "list" };
+  const DEFAULT = { kind: ["어린이집"], gu: [], foundation: [], type: [], q: "", fav: false, cl: false, sort: "end", view: "list" };
   const NO_FOUNDATION = "센터 게시판";
   const today = new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" });
 
@@ -62,7 +52,6 @@
     chips($("#f-foundation"), [...foundations().map((f) => f.name), NO_FOUNDATION]
       .map((f) => [f, f, count((j) => fnd(j) === f)]), "foundation");
     chips($("#f-type"), TYPES.map((t) => [t, t, count((j) => j.orgType === t)]).filter((x) => x[2]), "type");
-    chips($("#f-job"), Object.entries(JOB_GROUPS).map(([g, list]) => [g, g, count((j) => list.includes(j.job))]).filter((x) => x[2]), "job");
     document.querySelectorAll("#f-kind input").forEach((i) => {
       if (!i.disabled) i.checked = state.kind.includes(i.value);
     });
@@ -78,7 +67,6 @@
     if (state.gu.length && !state.gu.includes(j.gu)) return false;
     if (state.foundation.length && !state.foundation.includes(fnd(j))) return false;
     if (state.type.length && !state.type.includes(j.orgType)) return false;
-    if (state.job.length && !state.job.some((g) => (JOB_GROUPS[g] || []).includes(j.job))) return false;
     if (state.fav && !isFav(j)) return false;
     if (state.cl && !j.coverLetter) return false;
     if (state.q) {
@@ -105,7 +93,7 @@
     else { b.textContent = `D-${d}`; s.textContent = `${md(j.end)} 마감`; }
     if (d != null && d <= 2) li.classList.add("is-urgent");
 
-    li.querySelector(".meta").textContent = [j.gu, j.orgType, j.job].filter(Boolean).join(" · ");
+    li.querySelector(".meta").textContent = [j.gu, j.orgType, j.job !== "보육교사" ? j.job : null].filter(Boolean).join(" · ");
     const a = li.querySelector("h3 a");
     a.textContent = j.title; a.href = safeUrl(j.url);
     li.querySelector(".org span").textContent = j.org;
@@ -177,7 +165,7 @@
     $("#fav-jobs").replaceChildren(...favJobs.map(card));
     $("#fav-names").textContent = favJobs.length ? `${favJobs.length}건` : "지금 열린 공고 없음";
 
-    const n = state.gu.length + state.foundation.length + state.type.length + state.job.length + (state.q ? 1 : 0) + (state.fav ? 1 : 0) + (state.cl ? 1 : 0);
+    const n = state.gu.length + state.foundation.length + state.type.length + (state.q ? 1 : 0) + (state.fav ? 1 : 0) + (state.cl ? 1 : 0);
     $("#filter-summary").textContent = n ? `${n}개 조건 적용` : "전체";
   }
 

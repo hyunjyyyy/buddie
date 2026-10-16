@@ -58,6 +58,14 @@ def deadline_hint(body):
     return None
 
 
+# 보여주는 직종. 보조·대체교사, 조리원 등 다른 직종은 수집 단계에서 뺀다.
+TEACHER_JOBS = ("보육교사", "가정보육교사")
+
+
+def is_teacher(job):
+    return job in TEACHER_JOBS
+
+
 def job_of(text):
     """재단 사이트의 자유 서술 직종을 센터 게시판 직종 이름으로 맞춘다."""
     for key, job in (("보조", "보조교사"), ("대체", "대체교사"), ("조리", "조리원"), ("영양", "영양사"),

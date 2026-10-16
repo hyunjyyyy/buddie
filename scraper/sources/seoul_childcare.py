@@ -2,7 +2,7 @@
 import re
 import time
 
-from common import clean, cover_letter, deadline_hint, fetch, find_gu, foundation_of, to_text
+from common import clean, cover_letter, deadline_hint, fetch, find_gu, foundation_of, is_teacher, to_text
 
 ID = "seoul-ccef"
 NAME = "서울시육아종합지원센터"
@@ -71,7 +71,7 @@ def parse_detail(t):
 def collect(cache, max_details=300, delay=1.0):
     """cache: joseq -> 상세 파싱 결과. 상세는 처음 본 공고만 받는다.
     15분에 600건쯤 받으면 사이트가 IP 를 20~30분 막는다. 그래서 한 번에 300건까지만 받고 나머지는 다음 실행으로 미룬다."""
-    rows = list_open()
+    rows = [r for r in list_open() if is_teacher(r["job"])]
     jobs, fetched = [], 0
     for r in rows:
         d = cache.get(r["joseq"])
